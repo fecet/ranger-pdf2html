@@ -36,7 +36,6 @@ args = parser.parse_args()
 
 # %%
 
-# Post process for the HTML file
 
 pdf_path = Path(args.pdf_path)  # pdf_path = Path("test.pdf")
 html_path = (
@@ -44,18 +43,18 @@ html_path = (
     if args.html_path
     else pdf_path.parent / f"{pdf_path.stem}.html"
 )
-subprocess.run(["pdf2htmlEX", pdf_path, html_path])
+if not html_path.exists():
+    subprocess.run(["pdf2htmlEX", pdf_path, html_path])
+    # Post process for the HTML file
+    # Delete TOC
+    with open(html_path, "r+") as f:
+        soup = BeautifulSoup(f, "html.parser")
+        elements = soup.find_all("div", id="sidebar")
+        for element in elements:
+            element.decompose()
 
-# %%
+        f.write(str(soup))
 
-
-with open(html_path, "r+") as f:
-    soup = BeautifulSoup(f, "html.parser")
-    elements = soup.find_all("div", id="sidebar")
-    for element in elements:
-        element.decompose()
-
-    f.write(str(soup))
 
 # %%
 
